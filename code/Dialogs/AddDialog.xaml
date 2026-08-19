@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="Catpaq.Dialogs.AddDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Catpaq.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Add to ZPAQ"
+    PrimaryButtonText="OK"
+    SecondaryButtonText="Cancel"
+    DefaultButton="Primary"
+    PrimaryButtonClick="OnPrimaryClick"
+    SecondaryButtonClick="OnSecondaryClick"
+    mc:Ignorable="d">
+
+    <!-- 内容区宽度 498，四周留白 -->
+    <Grid MinWidth="498" MaxWidth="498">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶部：归档 + 待添加文件 -->
+        <StackPanel x:Name="TopPanel" Grid.Row="0" Spacing="6" Margin="0,0,0,8">
+            <TextBlock x:Name="LblFilesHeader" Text="Files to add:" />
+            <TextBox x:Name="EdtFiles" IsReadOnly="True" Height="60" TextWrapping="Wrap" />
+
+            <TextBlock x:Name="LblArchive" Text="Archive:" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="EdtArchive" Grid.Column="0" />
+                <Button x:Name="BtnBrowseArc" Grid.Column="1" Content="..." Margin="8,0,0,0" Click="BtnBrowseArc_Click" />
+            </Grid>
+        </StackPanel>
+
+        <!-- 内容区（可滚动）。不固定子宽度：ScrollViewer 会把内容限制在“视口 − 滚动条”内，
+             滚动条出现时内容自动避让，不会与滚动条重叠 -->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="8" Padding="0,4">
+
+                <!-- ===== 基础模块（快速页与向导基础步共用同一套控件） =====
+                     分类顺序：归档格式 → 加密密码 → 校验/性能 → 分割 → 压缩参数 → 路径 → 开关 -->
+                <StackPanel x:Name="StandardPanel" Spacing="8">
+
+                    <!-- 1. 归档格式 / 压缩（每项独占一行） -->
+                    <TextBlock x:Name="LblSimpleTitle" Text="Quick add" FontWeight="SemiBold" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LblFmt" Grid.Column="0" Text="Archive format:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <ComboBox x:Name="CmbFormat" Grid.Column="1" SelectionChanged="CmbFormat_SelectionChanged">
+                            <ComboBoxItem Content="Normal" IsSelected="True" />
+                            <ComboBoxItem Content="AES" />
+                            <ComboBoxItem Content="Franzen" />
+                            <ComboBoxItem Content="AES + Franzen" />
+                        </ComboBox>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LblCompression" Grid.Column="0" Text="Compression:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <ComboBox x:Name="CmbCompression" Grid.Column="1">
+                            <ComboBoxItem Content="0 (Store)" />
+                            <ComboBoxItem Content="1 (Default)" IsSelected="True" />
+                            <ComboBoxItem Content="2" />
+                            <ComboBoxItem Content="3" />
+                            <ComboBoxItem Content="4" />
+                            <ComboBoxItem Content="5 (Top)" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- 2. 加密密码（按格式显隐，每项独占一行） -->
+                    <StackPanel x:Name="PwdPanel" Spacing="6">
+                        <StackPanel x:Name="AesRow" Spacing="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LblAes" Grid.Column="0" Text="AES Password:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <PasswordBox x:Name="EdtAes1" Grid.Column="1" />
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LblAes2" Grid.Column="0" Text="Confirm:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <PasswordBox x:Name="EdtAes2" Grid.Column="1" />
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel x:Name="FranzenRow" Spacing="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LblFranzen" Grid.Column="0" Text="Franzen Password:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <PasswordBox x:Name="EdtFranzen1" Grid.Column="1" />
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LblFranzen2" Grid.Column="0" Text="Confirm:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <PasswordBox x:Name="EdtFranzen2" Grid.Column="1" />
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 3. 校验 + 性能（每项独占一行） -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LblHash" Grid.Column="0" Text="Hash:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <ComboBox x:Name="CmbHash" Grid.Column="1">
+                            <ComboBoxItem Content="(NONE)" />
+                            <ComboBoxItem Content="XXHASH (DEFAULT)" IsSelected="True" />
+                            <ComboBoxItem Content="MD5" />
+                            <ComboBoxItem Content="SHA1" />
+                            <ComboBoxItem Content="SHA256" />
+                            <ComboBoxItem Content="SHA3" />
+                            <ComboBoxItem Content="XXH3" />
+                            <ComboBoxItem Content="BLAKE3" />
+                            <ComboBoxItem Content="WHIRLPOOL" />
+                            <ComboBoxItem Content="HIGHWAY64" />
+                            <ComboBoxItem Content="HIGHWAY128" />
+                            <ComboBoxItem Content="HIGHWAY256" />
+                        </ComboBox>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LblThreads" Grid.Column="0" Text="Threads:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <ComboBox x:Name="CmbThreads" Grid.Column="1">
+                            <ComboBoxItem Content="MAX" IsSelected="True" />
+                            <ComboBoxItem Content="1" />
+                            <ComboBoxItem Content="2" />
+                            <ComboBoxItem Content="3" />
+                            <ComboBoxItem Content="4" />
+                            <ComboBoxItem Content="6" />
+                            <ComboBoxItem Content="8" />
+                            <ComboBoxItem Content="12" />
+                            <ComboBoxItem Content="16" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- 4. 分割：多分片 / 分块传输（向导基础步显示，快速页隐藏，每项独占一行） -->
+                    <StackPanel x:Name="RowMultipart" Spacing="6" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblMultipart" Grid.Column="0" Text="Multipart:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox x:Name="CmbMultipart" Grid.Column="1">
+                                <ComboBoxItem Content="(NO-single archive)" IsSelected="True" />
+                                <ComboBoxItem Content="_? (9 PARTS)" />
+                                <ComboBoxItem Content="_?? (99 PARTS)" />
+                                <ComboBoxItem Content="_??? (999 PARTS)" />
+                                <ComboBoxItem Content="_???? (9999 PARTS)" />
+                                <ComboBoxItem Content="_???????? (LOTS)" />
+                            </ComboBox>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblChunked" Grid.Column="0" Text="Chunked:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox x:Name="CmbChunked" Grid.Column="1">
+                                <ComboBoxItem Content="NO" IsSelected="True" />
+                                <ComboBoxItem Content="100M" />
+                                <ComboBoxItem Content="500M" />
+                                <ComboBoxItem Content="1000M" />
+                                <ComboBoxItem Content="650M (CD)" />
+                                <ComboBoxItem Content="750M (CD)" />
+                                <ComboBoxItem Content="4400M (DVD)" />
+                                <ComboBoxItem Content="8120M (DVD-DL)" />
+                                <ComboBoxItem Content="23000M (BR)" />
+                                <ComboBoxItem Content="4090M (FAT32)" />
+                                <ComboBoxItem Content="1G" />
+                                <ComboBoxItem Content="2G" />
+                                <ComboBoxItem Content="4G" />
+                            </ComboBox>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- 5. 压缩参数：块大小 / 分片（每项独占一行） -->
+                    <StackPanel x:Name="RowBlocksize" Spacing="6" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblBlocksize" Grid.Column="0" Text="Block size:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox x:Name="CmbBlocksize" Grid.Column="1">
+                                <ComboBoxItem Content="DEFAULT" IsSelected="True" />
+                                <ComboBoxItem Content="0 1KB" />
+                                <ComboBoxItem Content="1 2KB" />
+                                <ComboBoxItem Content="2 4KB" />
+                                <ComboBoxItem Content="3 8KB" />
+                                <ComboBoxItem Content="4 16KB" />
+                                <ComboBoxItem Content="5 32KB" />
+                                <ComboBoxItem Content="6 64KB" />
+                                <ComboBoxItem Content="7 128KB" />
+                                <ComboBoxItem Content="8 256KB" />
+                                <ComboBoxItem Content="9 512KB" />
+                                <ComboBoxItem Content="10 1MB" />
+                                <ComboBoxItem Content="11 2MB" />
+                                <ComboBoxItem Content="12 4MB" />
+                                <ComboBoxItem Content="13 8MB" />
+                                <ComboBoxItem Content="14 16MB" />
+                                <ComboBoxItem Content="15 32MB" />
+                                <ComboBoxItem Content="16 64MB" />
+                            </ComboBox>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblFragment" Grid.Column="0" Text="Fragment:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox x:Name="CmbFragment" Grid.Column="1">
+                                <ComboBoxItem Content="DEFAULT" IsSelected="True" />
+                                <ComboBoxItem Content="0 1KB" />
+                                <ComboBoxItem Content="1 2KB" />
+                                <ComboBoxItem Content="2 4KB" />
+                                <ComboBoxItem Content="3 8KB" />
+                                <ComboBoxItem Content="4 16KB" />
+                                <ComboBoxItem Content="5 32KB" />
+                                <ComboBoxItem Content="6 64KB" />
+                                <ComboBoxItem Content="7 128KB" />
+                                <ComboBoxItem Content="8 256KB" />
+                                <ComboBoxItem Content="9 512KB" />
+                                <ComboBoxItem Content="10 1MB" />
+                            </ComboBox>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- 6. 路径重写：到 / 查找 / 替换（各自独立一行） -->
+                    <Grid x:Name="RowTo" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LblTo" Grid.Column="0" Text="To:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox x:Name="EdtTo" Grid.Column="1" />
+                    </Grid>
+                    <Grid x:Name="RowFind" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LblFind" Grid.Column="0" Text="Find:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox x:Name="EdtFind" Grid.Column="1" />
+                    </Grid>
+                    <Grid x:Name="RowReplace" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="LblReplace" Grid.Column="0" Text="Replace:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox x:Name="EdtReplace" Grid.Column="1" />
+                    </Grid>
+
+                    <!-- 7. 常用开关（快速页显示） -->
+                    <StackPanel x:Name="SimpleSwitches" Spacing="4">
+                        <TextBlock x:Name="LblSimpleSwitches" Text="Common switches" FontWeight="SemiBold" />
+                        <VariableSizedWrapGrid ItemWidth="240" ItemHeight="32">
+                            <CheckBox x:Name="ChkForce" Content="Force (-force)" />
+                            <CheckBox x:Name="ChkStdout" Content="Stdout-compatible (-stdout)" />
+                            <CheckBox x:Name="ChkStore" Content="Store only (-store)" />
+                            <CheckBox x:Name="ChkNoChecksum" Content="No checksum (-nochecksum)" />
+                            <CheckBox x:Name="ChkLongPath" Content="Longpath (>255) (-longpath)" IsChecked="True" />
+                            <CheckBox x:Name="ChkVss" Content="Use VSS (-vss)" />
+                        </VariableSizedWrapGrid>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- ===== 向导其余步骤 ===== -->
+                <StackPanel x:Name="WizardContent" Spacing="8" Visibility="Collapsed">
+
+                    <!-- Step 2: 高级 -->
+                    <StackPanel x:Name="StepAdvanced" Spacing="8" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblMinSize" Grid.Column="0" Text="Minsize:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox x:Name="CmbMinSize" Grid.Column="1">
+                                <ComboBoxItem Content="(NO)" IsSelected="True" />
+                                <ComboBoxItem Content="1 KB" />
+                                <ComboBoxItem Content="10 KB" />
+                                <ComboBoxItem Content="100 KB" />
+                                <ComboBoxItem Content="1 MB" />
+                                <ComboBoxItem Content="10 MB" />
+                                <ComboBoxItem Content="100 MB" />
+                                <ComboBoxItem Content="1 GB" />
+                            </ComboBox>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblMaxSize" Grid.Column="0" Text="Maxsize:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox x:Name="CmbMaxSize" Grid.Column="1">
+                                <ComboBoxItem Content="(NO)" IsSelected="True" />
+                                <ComboBoxItem Content="1 KB" />
+                                <ComboBoxItem Content="10 KB" />
+                                <ComboBoxItem Content="100 KB" />
+                                <ComboBoxItem Content="1 MB" />
+                                <ComboBoxItem Content="10 MB" />
+                                <ComboBoxItem Content="100 MB" />
+                                <ComboBoxItem Content="1 GB" />
+                            </ComboBox>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblComment" Grid.Column="0" Text="Comment:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBox x:Name="EdtComment" Grid.Column="1" />
+                        </Grid>
+                        <TextBlock x:Name="LblTimeStamp" Text="Timestamp:" />
+                        <TextBox x:Name="EdtTimeStamp" PlaceholderText="DD/MM/YYYY HH:MM:SS" />
+                        <TextBlock x:Name="LblDateFrom" Text="Date from:" />
+                        <TextBox x:Name="EdtDateFrom" PlaceholderText="YYYY-MM-DD" />
+                        <TextBlock x:Name="LblDateTo" Text="Date to:" />
+                        <TextBox x:Name="EdtDateTo" PlaceholderText="YYYY-MM-DD" />
+
+                        <TextBlock x:Name="LblAdvCheck" Text="Switches" FontWeight="SemiBold" />
+                        <VariableSizedWrapGrid ItemWidth="240" ItemHeight="32">
+                            <CheckBox x:Name="ChkVerbose" Content="Verbose (-verbose)" />
+                            <CheckBox x:Name="ChkIgnoreSpace" Content="Ignore free space (-space)" />
+                            <CheckBox x:Name="ChkForceOffice" Content="Force old Office (-xls)" />
+                            <CheckBox x:Name="ChkNoZfs" Content="No zfs (-nozfs)" />
+                            <CheckBox x:Name="ChkForceWindows" Content="Force Windows (-forcewindows)" />
+                            <CheckBox x:Name="Chk715" Content="zpaq 7.15 mode (-715)" />
+                            <CheckBox x:Name="ChkHome" Content="1-level home (-home)" />
+                            <CheckBox x:Name="ChkNoArchiveAttr" Content="No archive attribute (-noarchiveattr)" />
+                            <CheckBox x:Name="ChkCrc32" Content="CRC-32 verify (-crc32)" />
+                            <CheckBox x:Name="ChkRecover" Content="Recover (-recover)" />
+                            <CheckBox x:Name="ChkQuiet" Content="Quiet (-quiet)" />
+                            <CheckBox x:Name="ChkStats" Content="Stats (-stats)" />
+                            <CheckBox x:Name="ChkNoPrefix" Content="No prefix (-noprefix)" />
+                            <CheckBox x:Name="ChkUtf8" Content="UTF-8 (-utf8)" />
+                            <CheckBox x:Name="ChkUtc" Content="Force utc time (-utc)" />
+                            <CheckBox x:Name="ChkTouch" Content="Force touch (-touch)" />
+                            <CheckBox x:Name="ChkKill" Content="Kill (-kill)" />
+                            <CheckBox x:Name="ChkZero" Content="Zero (-zero)" />
+                            <CheckBox x:Name="ChkCollision" Content="Collision (-collision)" />
+                        </VariableSizedWrapGrid>
+                    </StackPanel>
+
+                    <!-- Step 3: 选择 -->
+                    <StackPanel x:Name="StepSelection" Spacing="8" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblNot" Grid.Column="0" Text="NOT:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBox x:Name="EdtNot" Grid.Column="1" PlaceholderText="*.tmp *.bak" />
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblOnly" Grid.Column="0" Text="ONLY:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBox x:Name="EdtOnly" Grid.Column="1" PlaceholderText="*.jpg *.png" />
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblAlways" Grid.Column="0" Text="ALWAYS:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBox x:Name="EdtAlways" Grid.Column="1" PlaceholderText="*.log *.txt" />
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Step 4: 其他 -->
+                    <StackPanel x:Name="StepOther" Spacing="8" Visibility="Collapsed">
+                        <CheckBox x:Name="ChkSfx" Content="Create self-extracting archive (SFX) (-sfx)" />
+                        <CheckBox x:Name="ChkBackup" Content="Backup mode (append a new version) (-backup)" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LblDrive" Grid.Column="0" Text="Drive to image:" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ComboBox x:Name="CmbDrive" Grid.Column="1">
+                                <ComboBoxItem Content="(NO)" IsSelected="True" />
+                                <ComboBoxItem Content="C:\" />
+                                <ComboBoxItem Content="D:\" />
+                                <ComboBoxItem Content="E:\" />
+                                <ComboBoxItem Content="F:\" />
+                            </ComboBox>
+                        </Grid>
+                        <TextBlock x:Name="LblExternal" Text="External zpaqfranz:" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="EdtExternal" Grid.Column="0" IsReadOnly="True" />
+                            <Button x:Name="BtnBrowseExe" Grid.Column="1" Content="..." Margin="8,0,0,0" Click="BtnBrowseExe_Click" />
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- 向导日志（最后执行时显示） -->
+                    <StackPanel x:Name="StepLog" Spacing="4" Visibility="Collapsed">
+                        <TextBlock x:Name="LblTabLog" Text="Log" FontWeight="SemiBold" />
+                        <TextBox x:Name="MemLog" IsReadOnly="True" AcceptsReturn="True"
+                                 Height="180" FontFamily="Consolas"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+                    </StackPanel>
+
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- 底部：模式切换 + 步骤按钮 + 进度 -->
+        <StackPanel Grid.Row="2" Spacing="6" Margin="0,8,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <!-- 左侧：模式切换 -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
+                    <Button x:Name="BtnAdvanced" Content="Advanced options..." Click="BtnAdvanced_Click" />
+                    <Button x:Name="BtnBackToSimple" Content="Simple" Visibility="Collapsed" Click="BtnBackToSimple_Click" />
+                </StackPanel>
+                <!-- 右侧：向导四步按钮（右对齐，当前步高亮），压缩 → 注释 → 匹配 → 部署 -->
+                <StackPanel x:Name="StepIndicator" Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Visibility="Collapsed">
+                    <Button x:Name="BtnStep1" Content="Compress" Click="BtnStep_Click" Tag="0" />
+                    <Button x:Name="BtnStep2" Content="Comment" Click="BtnStep_Click" Tag="1" />
+                    <Button x:Name="BtnStep3" Content="Match" Click="BtnStep_Click" Tag="2" />
+                    <Button x:Name="BtnStep4" Content="Deploy" Click="BtnStep_Click" Tag="3" />
+                </StackPanel>
+            </Grid>
+            <StackPanel x:Name="ProgressPanel" Orientation="Horizontal" Spacing="8" Visibility="Collapsed">
+                <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Width="300" />
+                <TextBlock x:Name="LblPct" Text="0%" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock x:Name="LblLog" Text="" TextWrapping="Wrap" MaxHeight="60" Foreground="Gray" />
+        </StackPanel>
+    </Grid>
+</ContentDialog>

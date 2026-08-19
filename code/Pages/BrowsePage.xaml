@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Catpaq.Pages.BrowsePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Catpaq.Controls"
+    xmlns:local="using:Catpaq.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <!-- Files 风格图标按钮：常态无背景/边框，悬停时显示填充反馈（深浅色均可见） -->
+            <Style x:Key="IconToolButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="6" />
+                <Setter Property="MinWidth" Value="28" />
+                <Setter Property="MinHeight" Value="28" />
+            </Style>
+
+            <!-- 此电脑页：分组头行（"文件夹" / "设备和驱动器"） -->
+            <DataTemplate x:Key="ThisPcGroupHeaderTemplate">
+                <Border
+                    Padding="8,6,8,6"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                    BorderThickness="0,1,0,1">
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                </Border>
+            </DataTemplate>
+
+            <!-- 此电脑页：普通行（文件夹/驱动器），带真实系统图标 -->
+            <DataTemplate x:Key="ThisPcItemRowTemplate">
+                <Grid Padding="8,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="36" />
+                        <ColumnDefinition Width="264" />
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="160" />
+                        <ColumnDefinition Width="100" />
+                    </Grid.ColumnDefinitions>
+                    <!-- 图标（此电脑页异步加载） -->
+                    <Image Grid.Column="0" Width="16" Height="16" Source="{Binding IconSource}" VerticalAlignment="Center" />
+                    <!-- 点复选框才选中（用于添加/解压等多选操作），点行其余部分进入 -->
+                    <CheckBox Grid.Column="1" VerticalAlignment="Center" Tag="{Binding}"
+                              Checked="ItemCheck_Changed" Unchecked="ItemCheck_Changed" />
+                    <TextBlock Grid.Column="2" Text="{Binding Name}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="{Binding SizeText}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="4" Text="{Binding ModifiedText}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="5" Text="{Binding TypeText}" VerticalAlignment="Center" />
+                </Grid>
+            </DataTemplate>
+
+            <!-- 按 ItemVm.IsGroupHeader 选择分组头/普通行模板 -->
+            <local:ThisPcItemTemplateSelector
+                x:Key="ThisPcItemTemplateSelector"
+                GroupHeaderTemplate="{StaticResource ThisPcGroupHeaderTemplate}"
+                ItemRowTemplate="{StaticResource ThisPcItemRowTemplate}" />
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶部工具栏：后退/前进/上级/刷新 + 路径栏 + 过滤 -->
+        <Grid Grid.Row="0" Padding="8,8,8,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+                <Button x:Name="BtnBack" Style="{StaticResource IconToolButtonStyle}" ToolTipService.ToolTip="Back" Click="BtnBack_Click">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{ThemeResource SystemBaseLowColor}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{ThemeResource SystemBaseMediumLowColor}" />
+                    </Button.Resources>
+                    <FontIcon Glyph="&#xE72B;" FontSize="14" />
+                </Button>
+                <Button x:Name="BtnForward" Style="{StaticResource IconToolButtonStyle}" ToolTipService.ToolTip="Forward" Click="BtnForward_Click">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{ThemeResource SystemBaseLowColor}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{ThemeResource SystemBaseMediumLowColor}" />
+                    </Button.Resources>
+                    <FontIcon Glyph="&#xE72A;" FontSize="14" />
+                </Button>
+                <Button x:Name="BtnUp" Style="{StaticResource IconToolButtonStyle}" ToolTipService.ToolTip="Up" Click="BtnUp_Click">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{ThemeResource SystemBaseLowColor}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{ThemeResource SystemBaseMediumLowColor}" />
+                    </Button.Resources>
+                    <FontIcon Glyph="&#xE74A;" FontSize="14" />
+                </Button>
+                <Button x:Name="BtnRefresh" Style="{StaticResource IconToolButtonStyle}" ToolTipService.ToolTip="Refresh" Click="BtnRefresh_Click">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{ThemeResource SystemBaseLowColor}" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{ThemeResource SystemBaseMediumLowColor}" />
+                    </Button.Resources>
+                    <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                </Button>
+            </StackPanel>
+
+            <!-- 地址栏（Files Omnibar 风格：圆角矩形背景，面包屑 ⇄ 输入框互斥） -->
+            <Grid Grid.Column="1" Margin="8,0" Height="38" VerticalAlignment="Center" Tapped="Omnibar_Tapped">
+                <Border
+                    x:Name="OmnibarBg"
+                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CircleElevationBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <Grid>
+                        <!-- 地址栏最左侧：此电脑按钮（Files Omnibar 同款：进入"此电脑"视图），图标 TVMonitor U+E7F4 -->
+                        <Button
+                            x:Name="BtnThisPc"
+                            Width="36"
+                            Height="34"
+                            Margin="2,0,0,0"
+                            HorizontalAlignment="Left"
+                            Style="{StaticResource IconToolButtonStyle}"
+                            ToolTipService.ToolTip="此电脑"
+                            Click="BtnThisPc_Click">
+                            <Button.Resources>
+                                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="{ThemeResource SystemBaseLowColor}" />
+                                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="{ThemeResource SystemBaseMediumLowColor}" />
+                            </Button.Resources>
+                            <FontIcon Glyph="&#xE7F4;" FontSize="14" />
+                        </Button>
+
+                        <!-- 自定义 BreadcrumbBar（移植自 Files）：Windows 11 风格分层，自动折叠为 …；
+                             不设 RootItem —— 地址栏左侧已有独立"此电脑"按钮，根项为空时自动隐藏（不显示空半圆） -->
+                        <controls:BreadcrumbBar
+                            x:Name="OmnibarCrumbs"
+                            Margin="42,0"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Stretch"
+                            ItemClicked="OmnibarCrumbs_ItemClicked"
+                            ItemDropDownFlyoutOpening="OmnibarCrumbs_DropDownFlyoutOpening">
+                            <controls:BreadcrumbBar.ItemTemplate>
+                                <DataTemplate>
+                                    <controls:BreadcrumbBarItem Content="{Binding Label}" />
+                                </DataTemplate>
+                            </controls:BreadcrumbBar.ItemTemplate>
+                        </controls:BreadcrumbBar>
+                        <TextBox
+                            x:Name="EdtPathBox"
+                            Visibility="Collapsed"
+                            VerticalContentAlignment="Center"
+                            Background="{ThemeResource TextControlBackgroundFocused}"
+                            BorderBrush="{ThemeResource CircleElevationBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="12,0"
+                            PlaceholderText="Path"
+                            KeyDown="EdtPathBox_KeyDown"
+                            LostFocus="EdtPathBox_LostFocus">
+                            <!-- 自定义模板：ContentElement 垂直居中，保证编辑框文字上下居中 -->
+                            <TextBox.Template>
+                                <ControlTemplate TargetType="TextBox">
+                                    <Grid>
+                                        <Border
+                                            x:Name="BorderElement"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            CornerRadius="{TemplateBinding CornerRadius}" />
+                                        <ScrollViewer
+                                            x:Name="ContentElement"
+                                            VerticalAlignment="Center"
+                                            Margin="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}"
+                                            IsTabStop="False"
+                                            ZoomMode="Disabled"
+                                            HorizontalScrollMode="Disabled"
+                                            HorizontalScrollBarVisibility="Hidden"
+                                            VerticalScrollMode="Disabled"
+                                            VerticalScrollBarVisibility="Hidden"
+                                            AutomationProperties.AccessibilityView="Raw" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </TextBox.Template>
+                        </TextBox>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- 归档操作按钮 + 搜索框（同一栏）：有按钮时搜索框压缩自身宽度让位 -->
+        <Grid Grid.Row="1" Padding="8,0,8,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel x:Name="ArchiveBar" Grid.Column="0" Orientation="Horizontal" Spacing="4" Visibility="Collapsed">
+                <Button x:Name="BtnBackFs" Click="BtnBackFs_Click" Content="← Back to filesystem" />
+                <Button x:Name="BtnExtract" Click="BtnExtract_Click" Content="Extract" />
+                <Button x:Name="BtnTest" Click="BtnTest_Click" Content="Test" />
+            </StackPanel>
+
+            <TextBox
+                x:Name="EdtFilter"
+                Grid.Column="1"
+                Margin="8,0,0,0"
+                KeyDown="EdtFilter_KeyDown"
+                PlaceholderText="Filter" />
+        </Grid>
+
+        <!-- 主体：侧边栏 + 竖线分隔 + 文件列表 -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" MinWidth="160" />
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <controls:SidebarView
+                x:Name="Sidebar"
+                Grid.Column="0"
+                SupportsExpansion="True"
+                MenuItemsSource="{x:Bind SidebarVm.FlatSidebarItems, Mode=OneWay}"
+                SelectedItem="{x:Bind SidebarVm.SelectedItem, Mode=TwoWay}"
+                ItemInvoked="Sidebar_ItemInvoked" />
+
+            <!-- 侧边栏与文件列表之间的浅色竖线（深浅色主题自适应） -->
+            <Rectangle
+                Grid.Column="1"
+                Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+            <Grid Grid.Column="2" Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- 列头 -->
+                <Grid Grid.Row="0" Padding="8,4" Background="{ThemeResource LayerFillColorDefaultBrush}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="24" />
+                        <ColumnDefinition Width="36" />
+                        <ColumnDefinition Width="264" />
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="160" />
+                        <ColumnDefinition Width="100" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="LblColName" Grid.Column="2" Text="Name" FontWeight="SemiBold" />
+                    <TextBlock x:Name="LblColSize" Grid.Column="3" Text="Size" FontWeight="SemiBold" />
+                    <TextBlock x:Name="LblColModified" Grid.Column="4" Text="Modified" FontWeight="SemiBold" />
+                    <TextBlock x:Name="LblColType" Grid.Column="5" Text="Type" FontWeight="SemiBold" />
+                </Grid>
+
+                <ListView
+                    x:Name="FileList"
+                    Grid.Row="1"
+                    SelectionMode="Single"
+                    IsItemClickEnabled="True"
+                    ItemClick="FileList_ItemClick"
+                    RightTapped="FileList_RightTapped"
+                    DoubleTapped="FileList_DoubleTapped"
+                    KeyDown="FileList_KeyDown"
+                    ItemTemplateSelector="{StaticResource ThisPcItemTemplateSelector}" />
+            </Grid>
+        </Grid>
+
+        <!-- 状态栏 -->
+        <Grid Grid.Row="3" Padding="8,4" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <TextBlock x:Name="LblStatus" Text="" />
+        </Grid>
+    </Grid>
+</Page>

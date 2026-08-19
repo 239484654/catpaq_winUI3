@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--  catpaq WinUI 3 版项目文件（非打包、自包含，可直接 dotnet build 运行）  -->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>Catpaq</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <!--  非打包运行（不装 MSIX），Windows App Runtime 随应用自包含  -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!--  手动提供 Main()（unpackaged 标准做法）  -->
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>Assets\catpaq.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Labs.WinUI.DependencyPropertyGenerator" Version="0.1.250206-build.2040" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.251219" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2526" />
+    <PackageReference Include="Vanara.Windows.Shell" Version="4.0.1" />
+  </ItemGroup>
+
+  <!--  随应用分发 zpaqfranz 引擎  -->
+  <ItemGroup>
+    <None Include="zpaqfranz.exe" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!--  侧边栏分组头图标（照抄 Files 的 Assets/FluentIcons/SidebarSections PNG）  -->
+  <ItemGroup>
+    <Content Include="Assets\FluentIcons\SidebarSections\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!--
+    dotnet publish 不会自动收集 XAML 编译产物（.xbf/.pri）与应用 Assets，
+    导致打包版缺资源无法启动。这里在 publish 后从 build 输出补齐。
+  -->
+  <Target Name="CopyWinUiArtifactsToPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <_XbfFiles Include="$(OutputPath)**\*.xbf" />
+      <_PriFiles Include="$(OutputPath)*.pri" />
+      <_AssetsFiles Include="$(OutputPath)Assets\**\*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(_XbfFiles)"
+      DestinationFolder="$(PublishDir)%(RecursiveDir)"
+      SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="@(_PriFiles)"
+      DestinationFolder="$(PublishDir)"
+      SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="@(_AssetsFiles)"
+      DestinationFolder="$(PublishDir)Assets\%(RecursiveDir)"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

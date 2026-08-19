@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Catpaq.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Catpaq (WinUI 3)">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <!-- 标题栏（并入客户区，Mica 覆盖并跟随主题，可拖动窗口） -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="Transparent" Padding="12,0,0,0">
+            <TextBlock x:Name="LblTitleBar" Text="Catpaq" VerticalAlignment="Center" FontSize="12" Opacity="0.8" />
+        </Grid>
+        <NavigationView
+            x:Name="NavView"
+            Grid.Row="1"
+            PaneDisplayMode="Left"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            SelectionChanged="NavView_SelectionChanged"
+            Loaded="NavView_Loaded">
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="NavBrowse" Content="Browse" Tag="browse">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8B7;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavArchive" Content="Archive" Tag="archive">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8A5;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavLog" Content="Log" Tag="log">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7C3;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavResources" Content="Resources" Tag="resources">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9D9;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavSettings" Content="Settings" Tag="settings">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavAbout" Content="About" Tag="about">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+
+        <!-- 打开归档加载覆盖层：滑块滑动、进度未知，避免打开大 zpaq 时界面无反馈。
+             只覆盖内容区（Row 1），保留标题栏区域可拖动窗口 -->
+        <Grid
+            x:Name="LoadingOverlay"
+            Grid.Row="1"
+            Visibility="Collapsed"
+            Background="#80000000">
+            <Border
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="36,26"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                <StackPanel Spacing="18" Width="300">
+                    <TextBlock
+                        x:Name="LblLoadingTitle"
+                        Text="Opening archive..."
+                        HorizontalAlignment="Center"
+                        FontSize="15" />
+                    <ProgressBar
+                        x:Name="LoadingProgress"
+                        IsIndeterminate="True"
+                        HorizontalAlignment="Stretch" />
+                    <Button
+                        x:Name="BtnCancelLoading"
+                        Content="Cancel"
+                        HorizontalAlignment="Center"
+                        MinWidth="96"
+                        Click="BtnCancelLoading_Click" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

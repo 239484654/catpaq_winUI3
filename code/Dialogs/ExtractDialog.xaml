@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="Catpaq.Dialogs.ExtractDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Catpaq.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Extract"
+    PrimaryButtonText="OK"
+    SecondaryButtonText="Cancel"
+    DefaultButton="Primary"
+    PrimaryButtonClick="OnPrimaryClick"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="8" MinWidth="440">
+        <TextBlock x:Name="LblArchive" Text="Archive:" />
+        <TextBox x:Name="EdtArchive" IsReadOnly="True" />
+
+        <TextBlock x:Name="LblDest" Text="Destination folder:" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="EdtDest" Grid.Column="0" />
+            <Button x:Name="BtnBrowse" Grid.Column="1" Content="..." Margin="8,0,0,0" Click="BtnBrowse_Click" />
+        </Grid>
+
+        <TextBlock x:Name="LblFiles" Text="" TextWrapping="Wrap" />
+
+        <StackPanel x:Name="ProgressPanel" Orientation="Horizontal" Spacing="8" Visibility="Collapsed">
+            <ProgressBar x:Name="ProgressBar" Minimum="0" Maximum="100" Width="300" />
+            <TextBlock x:Name="LblPct" Text="0%" VerticalAlignment="Center" />
+        </StackPanel>
+        <TextBlock x:Name="LblEta" Text="" />
+        <TextBlock x:Name="LblLog" Text="" TextWrapping="Wrap" MaxHeight="120" Foreground="Gray" />
+    </StackPanel>
+</ContentDialog>
